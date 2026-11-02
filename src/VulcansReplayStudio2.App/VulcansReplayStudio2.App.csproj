@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\VulcansReplayStudio2.Core\VulcansReplayStudio2.Core.csproj" />
+    <ProjectReference Include="..\VulcansReplayStudio2.Infrastructure\VulcansReplayStudio2.Infrastructure.csproj" />
+    <ProjectReference Include="..\VulcansReplayStudio2.MediaEngine\VulcansReplayStudio2.MediaEngine.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+
+</Project>

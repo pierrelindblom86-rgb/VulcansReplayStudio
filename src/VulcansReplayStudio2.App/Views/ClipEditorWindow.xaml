@@ -1,0 +1,65 @@
+<Window x:Class="VulcansReplayStudio2.App.Views.ClipEditorWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Clip Editor" Width="960" Height="640" MinWidth="720" MinHeight="480"
+        WindowStartupLocation="CenterOwner"
+        Background="{StaticResource BgBrush}" Foreground="{StaticResource TextBrush}">
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,8">
+            <Button Content="Open Clip..." Click="OnOpenClick" Margin="0,0,8,0"/>
+            <Button x:Name="PlayPauseButton" Content="Play" Width="80" Click="OnPlayPauseClick" Margin="0,0,8,0"/>
+            <Button Content="Set In" Click="OnSetInClick" Margin="0,0,8,0"/>
+            <Button Content="Set Out" Click="OnSetOutClick" Margin="0,0,8,0"/>
+            <Button Content="Reset Trim" Click="OnResetTrimClick"/>
+        </StackPanel>
+
+        <!-- Preview -->
+        <Border Grid.Row="1" Background="Black" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1">
+            <MediaElement x:Name="Player" LoadedBehavior="Manual" UnloadedBehavior="Manual" Stretch="Uniform"
+                          MediaFailed="OnMediaFailed" MediaEnded="OnMediaEnded"/>
+        </Border>
+
+        <!-- Timeline -->
+        <Grid Grid.Row="2" Margin="0,8,0,4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="CurrentTimeText" Grid.Column="0" Text="00:00.000" Foreground="{StaticResource CyanBrush}" VerticalAlignment="Center" Margin="0,0,10,0"/>
+            <Slider x:Name="Timeline" Grid.Column="1" Minimum="0" Maximum="1" IsEnabled="False"
+                    ValueChanged="OnTimelineValueChanged" VerticalAlignment="Center"/>
+            <TextBlock x:Name="DurationText" Grid.Column="2" Text="/ 00:00.000" Foreground="{StaticResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="10,0,0,0"/>
+        </Grid>
+
+        <!-- Trim readout -->
+        <TextBlock Grid.Row="3" Margin="0,4,0,4" Foreground="{StaticResource TextSecondaryBrush}">
+            <Run Text="In: "/><Run x:Name="TrimInText" Text="--"/>
+            <Run Text="    Out: "/><Run x:Name="TrimOutText" Text="--"/>
+            <Run Text="    Length: "/><Run x:Name="TrimLengthText" Text="--"/>
+        </TextBlock>
+
+        <!-- Status and actions -->
+        <Grid Grid.Row="4" Margin="0,8,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock x:Name="StatusText" Grid.Column="0" VerticalAlignment="Center" TextWrapping="Wrap"
+                       Foreground="{StaticResource TextSecondaryBrush}" Text="Open a clip to start editing. The original file is never changed."/>
+            <Button x:Name="ExportButton" Grid.Column="1" Content="Export" Width="100" Margin="0,0,8,0"
+                    IsEnabled="False" ToolTip="Export is added in a later phase."/>
+            <Button Grid.Column="2" Content="Close" Width="100" IsCancel="True" Click="OnCloseClick"/>
+        </Grid>
+    </Grid>
+</Window>

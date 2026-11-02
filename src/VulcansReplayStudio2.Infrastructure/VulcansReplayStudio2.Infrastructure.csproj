@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\VulcansReplayStudio2.Core\VulcansReplayStudio2.Core.csproj" />
+    <ProjectReference Include="..\VulcansReplayStudio2.MediaEngine\VulcansReplayStudio2.MediaEngine.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>
