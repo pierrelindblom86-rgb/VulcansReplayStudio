@@ -42,9 +42,28 @@ public partial class LibraryView
                 Duration = clip.Duration.ToString(@"mm\:ss"),
                 Size = (clip.FileSizeBytes / 1024 / 1024) + "MB",
                 Date = clip.Created.ToString("yyyy-MM-dd"),
-                FilePath = clip.FilePath
+                FilePath = clip.FilePath,
+                IsImported = _settings.Settings.ImportedClipPaths.Any(p => ClipLibraryService.SamePath(p, clip.FilePath))
             };
             ClipList.Items.Add(row);
+        }
+        EmptyText.Visibility = ClipList.Items.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    // Prevents a second destructive action (for example a double-click) from starting while one is in progress.
+    private bool _busy;
+
+    private void RunExclusive(Action action)
+    {
+        if (_busy) return;
+        _busy = true;
+        try
+        {
+            action();
+        }
+        finally
+        {
+            _busy = false;
         }
     }
 
@@ -129,45 +148,103 @@ public partial class LibraryView
         }
     }
 
-    private void OnRenameClick(object sender, EventArgs e)
+    private void OnRenameClick(object sender, EventArgs e) => RunExclusive(() =>
     {
-        if (GetClipRow(sender) is ClipRow clip)
+        if (GetClipRow(sender) is not ClipRow clip) return;
+        var input = InputDialog.Show("Rename Clip", "New name:", clip.Name);
+        if (input == null) return;
+        try
         {
-            var input = InputDialog.Show("Rename Clip", "New name:", clip.Name);
-            if (input == null) return;
-            try
-            {
-                _library.RenameAsync(clip.FilePath, input).GetAwaiter().GetResult();
-                RefreshClips();
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show("Rename failed: " + ex.Message, "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-            }
+            _library.RenameAsync(clip.FilePath, input).GetAwaiter().GetResult();
         }
-    }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show("Rename failed: " + ex.Message, "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+        }
+        ReloadLibrary();
+    });
 
-    private void OnDeleteClick(object sender, EventArgs e)
+    // Recorded clip: sent to the Recycle Bin only.
+    private void OnDeleteClick(object sender, EventArgs e) => RunExclusive(() =>
     {
-        if (GetClipRow(sender) is ClipRow clip)
+        if (GetClipRow(sender) is not ClipRow clip) return;
+        if (!File.Exists(clip.FilePath))
         {
-            var isImported = _settings.Settings.ImportedClipPaths.Any(p => ClipLibraryService.SamePath(p, clip.FilePath));
-            var prompt = isImported
-                ? "Remove '" + clip.Name + "' from the Library? The original file will not be deleted."
-                : "Delete '" + clip.Name + "'? This cannot be undone.";
-            var result = System.Windows.MessageBox.Show(prompt, "Confirm Delete", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning);
-            if (result != System.Windows.MessageBoxResult.Yes) return;
-            try
-            {
-                _library.DeleteAsync(clip.FilePath).GetAwaiter().GetResult();
-                RefreshClips();
-            }
-            catch (Exception ex)
-            {
-                System.Windows.MessageBox.Show("Delete failed: " + ex.Message, "Error", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
-            }
+            System.Windows.MessageBox.Show("This clip no longer exists:" + Environment.NewLine + clip.FilePath,
+                "Delete Clip", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            ReloadLibrary();
+            return;
         }
-    }
+        var result = System.Windows.MessageBox.Show(
+            "Send this clip to the Recycle Bin?" + Environment.NewLine + Environment.NewLine
+            + "File: " + Path.GetFileName(clip.FilePath) + Environment.NewLine
+            + "Location: " + Path.GetDirectoryName(clip.FilePath) + Environment.NewLine + Environment.NewLine
+            + "You can restore it from the Recycle Bin.",
+            "Delete Clip", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning);
+        if (result != System.Windows.MessageBoxResult.Yes) return;
+        try
+        {
+            _library.DeleteAsync(clip.FilePath).GetAwaiter().GetResult();
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show("Delete failed. The file was not deleted." + Environment.NewLine + ex.Message, "Delete Clip",
+                System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+        }
+        ReloadLibrary();
+    });
+
+    // Imported clip: removes only the Library entry. The original file stays where it is.
+    private void OnRemoveImportedClick(object sender, EventArgs e) => RunExclusive(() =>
+    {
+        if (GetClipRow(sender) is not ClipRow clip) return;
+        var result = System.Windows.MessageBox.Show(
+            "Remove this clip from the Library?" + Environment.NewLine + Environment.NewLine
+            + "File: " + Path.GetFileName(clip.FilePath) + Environment.NewLine + Environment.NewLine
+            + "The original file will NOT be deleted.",
+            "Remove from Library", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Question);
+        if (result != System.Windows.MessageBoxResult.Yes) return;
+        try
+        {
+            _library.RemoveImportedAsync(clip.FilePath).GetAwaiter().GetResult();
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show("Remove failed: " + ex.Message, "Remove from Library",
+                System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+        }
+        ReloadLibrary();
+    });
+
+    // Imported clip: sends the original file to the Recycle Bin and removes its Library entry.
+    private void OnDeleteImportedFileClick(object sender, EventArgs e) => RunExclusive(() =>
+    {
+        if (GetClipRow(sender) is not ClipRow clip) return;
+        if (!File.Exists(clip.FilePath))
+        {
+            System.Windows.MessageBox.Show("The original file no longer exists:" + Environment.NewLine + clip.FilePath,
+                "Delete Original File", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Warning);
+            ReloadLibrary();
+            return;
+        }
+        var result = System.Windows.MessageBox.Show(
+            "Send the ORIGINAL video file to the Recycle Bin and remove it from the Library?" + Environment.NewLine + Environment.NewLine
+            + "File: " + Path.GetFileName(clip.FilePath) + Environment.NewLine
+            + "Location: " + Path.GetDirectoryName(clip.FilePath) + Environment.NewLine + Environment.NewLine
+            + "You can restore it from the Recycle Bin.",
+            "Delete Original File", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning);
+        if (result != System.Windows.MessageBoxResult.Yes) return;
+        try
+        {
+            _library.DeleteImportedOriginalAsync(clip.FilePath).GetAwaiter().GetResult();
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show("Delete failed. The file was not deleted and the Library entry was kept." + Environment.NewLine + ex.Message,
+                "Delete Original File", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+        }
+        ReloadLibrary();
+    });
 
     private void OnRefresh(object sender, EventArgs e)
     {
@@ -208,4 +285,7 @@ public class ClipRow
     public string Size { get; set; } = string.Empty;
     public string Date { get; set; } = string.Empty;
     public string FilePath { get; set; } = string.Empty;
+    public bool IsImported { get; set; }
+    public Visibility RecordedVisibility => IsImported ? Visibility.Collapsed : Visibility.Visible;
+    public Visibility ImportedVisibility => IsImported ? Visibility.Visible : Visibility.Collapsed;
 }

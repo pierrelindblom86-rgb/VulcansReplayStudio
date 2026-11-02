@@ -10,6 +10,8 @@ public interface ISettingsService
     AppSettings Settings { get; }
     Task LoadAsync();
     Task SaveAsync();
+    // Throws when the settings file cannot be written. Use where a failed save must stop a file operation.
+    Task SaveOrThrowAsync();
     string GetSettingsPath();
 }
 
@@ -50,6 +52,8 @@ public interface IClipLibraryService
     System.Collections.Generic.List<Models.ClipInfo> Clips { get; }
     Task RefreshAsync(string storagePath);
     Task DeleteAsync(string filePath);
+    Task RemoveImportedAsync(string filePath);
+    Task DeleteImportedOriginalAsync(string filePath);
     Task RenameAsync(string filePath, string newName);
     System.Collections.Generic.List<string> ImportFiles(System.Collections.Generic.IEnumerable<string> filePaths);
 }

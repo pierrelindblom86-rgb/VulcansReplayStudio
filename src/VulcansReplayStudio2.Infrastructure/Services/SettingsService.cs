@@ -66,12 +66,17 @@ public class SettingsService : ISettingsService
     {
         try
         {
-            var json = JsonSerializer.Serialize(Settings, new JsonSerializerOptions { WriteIndented = true });
-            var backup = _settingsPath + ".bak";
-            if (File.Exists(_settingsPath))
-                File.Copy(_settingsPath, backup, true);
-            await File.WriteAllTextAsync(_settingsPath, json).ConfigureAwait(false);
+            await SaveOrThrowAsync().ConfigureAwait(false);
         }
         catch { }
+    }
+
+    public async Task SaveOrThrowAsync()
+    {
+        var json = JsonSerializer.Serialize(Settings, new JsonSerializerOptions { WriteIndented = true });
+        var backup = _settingsPath + ".bak";
+        if (File.Exists(_settingsPath))
+            File.Copy(_settingsPath, backup, true);
+        await File.WriteAllTextAsync(_settingsPath, json).ConfigureAwait(false);
     }
 }

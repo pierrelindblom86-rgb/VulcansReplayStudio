@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\VulcansReplayStudio2.Core\VulcansReplayStudio2.Core.csproj" />
+    <ProjectReference Include="..\VulcansReplayStudio2.Infrastructure\VulcansReplayStudio2.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

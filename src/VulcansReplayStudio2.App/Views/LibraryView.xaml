@@ -26,20 +26,23 @@
                     <DataGridTextColumn Header="Duration" Width="80" Binding="{Binding Duration}"/>
                     <DataGridTextColumn Header="Size" Width="100" Binding="{Binding Size}"/>
                     <DataGridTextColumn Header="Date" Width="120" Binding="{Binding Date}"/>
-                    <DataGridTemplateColumn Header="Actions" Width="120">
+                    <DataGridTemplateColumn Header="Actions" Width="340">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-                                    <Button Content="Play" Click="OnPlayClick" Margin="2"/>
-                                    <Button Content="Edit" Click="OnEditClick" Margin="2"/>
-                                    <Button Content="Rename" Click="OnRenameClick" Margin="2"/>
-                                    <Button Content="Delete" Click="OnDeleteClick" Margin="2"/>
+                                    <Button Content="Play" Click="OnPlayClick" Margin="2" Padding="8,2"/>
+                                    <Button Content="Edit" Click="OnEditClick" Margin="2" Padding="8,2"/>
+                                    <Button Content="Rename" Click="OnRenameClick" Margin="2" Padding="8,2"/>
+                                    <Button Content="Delete" Click="OnDeleteClick" Margin="2" Padding="8,2" Visibility="{Binding RecordedVisibility}"/>
+                                    <Button Content="Remove" Click="OnRemoveImportedClick" Margin="2" Padding="8,2" Visibility="{Binding ImportedVisibility}"/>
+                                    <Button Content="Delete File" Click="OnDeleteImportedFileClick" Margin="2" Padding="8,2" Visibility="{Binding ImportedVisibility}"/>
                                 </StackPanel>
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
+            <TextBlock x:Name="EmptyText" Grid.Row="1" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" FontSize="14" Foreground="{StaticResource TextSecondaryBrush}" Text="No clips in the Library yet. Record a replay or import videos to see them here."/>
         </Grid>
     </Border>
 </UserControl>

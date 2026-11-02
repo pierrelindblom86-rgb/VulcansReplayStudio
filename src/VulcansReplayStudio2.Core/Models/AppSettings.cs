@@ -23,6 +23,8 @@ public class AppSettings
     public string Hotkey { get; set; } = "F9";
     // Videos registered from their original locations. The files are never moved or copied.
     public List<string> ImportedClipPaths { get; set; } = new();
+    // Clear Recent Clips hides clips created before this time. Files and Library entries are not affected.
+    public DateTime? RecentClipsHiddenBefore { get; set; }
     public double WindowLeft { get; set; } = 100;
     public double WindowTop { get; set; } = 100;
     public double WindowWidth { get; set; } = 1280;

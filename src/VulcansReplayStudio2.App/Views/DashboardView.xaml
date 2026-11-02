@@ -58,7 +58,10 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
-                <TextBlock Text="RECENT CLIPS" Foreground="{StaticResource TextBrush}" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                <DockPanel Margin="0,0,0,12">
+                    <Button x:Name="BtnClearRecent" DockPanel.Dock="Right" Content="Clear Recent Clips" Click="OnClearRecentClips" Margin="0"/>
+                    <TextBlock Text="RECENT CLIPS" Foreground="{StaticResource TextBrush}" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                </DockPanel>
                 <TextBlock x:Name="RecentClipsText" Text="No clips yet" Foreground="{StaticResource TextMutedBrush}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Grid>
         </Border>

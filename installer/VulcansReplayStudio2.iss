@@ -1,8 +1,8 @@
 #define AppName "Vulcans Replay Studio"
-#define AppVersion "1.0.1"
+#define AppVersion "1.1.0"
 #define AppPublisher "Vulcans Replay Studio"
 #define AppExeName "VulcansReplayStudio2.App.exe"
-#define SourceDir "..\dist\VulcansReplayStudio2_1.0.1"
+#define SourceDir "..\dist\VulcansReplayStudio2_1.1.0"
 
 [Setup]
 AppId={{6C2F1B24-8D1E-4C7A-9B62-3E5F0A7D4C12}
@@ -10,7 +10,7 @@ AppName={#AppName}
 AppVersion={#AppVersion}
 AppVerName={#AppName} {#AppVersion}
 AppPublisher={#AppPublisher}
-VersionInfoVersion=1.0.1.0
+VersionInfoVersion=1.1.0.0
 VersionInfoProductName={#AppName}
 VersionInfoDescription=Vulcans Replay Studio installer
 DefaultDirName={localappdata}\Programs\Vulcans Replay Studio
@@ -23,7 +23,7 @@ RestartApplications=no
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 OutputDir=..\dist
-OutputBaseFilename=VulcansReplayStudio-Setup-1.0.1
+OutputBaseFilename=VulcansReplayStudio-Setup-1.1.0
 Compression=lzma2/normal
 SolidCompression=yes
 WizardStyle=modern

@@ -98,11 +98,35 @@ public partial class DashboardView
         }
     }
 
+    // Clear Recent Clips only hides clips created before the saved timestamp; files and Library entries are untouched.
+    private void OnClearRecentClips(object sender, EventArgs e)
+    {
+        if (!VisibleRecentClips().Any())
+        {
+            StatusText.Text = "No recent clips to clear.";
+            return;
+        }
+        var result = MessageBox.Show(
+            "Clear the Recent Clips list? No video files or Library entries will be deleted, and new recordings will still appear here.",
+            "Clear Recent Clips", MessageBoxButton.YesNo, MessageBoxImage.Question);
+        if (result != MessageBoxResult.Yes) return;
+        _settings.Settings.RecentClipsHiddenBefore = DateTime.Now;
+        _settings.SaveAsync().GetAwaiter().GetResult();
+        RefreshRecentClips();
+        StatusText.Text = "Recent Clips cleared.";
+    }
+
+    private System.Collections.Generic.IEnumerable<VulcansReplayStudio2.Core.Models.ClipInfo> VisibleRecentClips()
+    {
+        var hidden = _settings.Settings.RecentClipsHiddenBefore;
+        return _library.Clips.Where(c => hidden == null || c.Created > hidden.Value).Take(5);
+    }
+
     private void RefreshRecentClips()
     {
         try
         {
-            var clips = _library.Clips.Take(5).Select(c => c.Name + " (" + c.Duration.ToString(@"mm\:ss") + ", " + (c.FileSizeBytes / 1024 / 1024) + "MB)");
+            var clips = VisibleRecentClips().Select(c => c.Name + " (" + c.Duration.ToString(@"mm\:ss") + ", " + (c.FileSizeBytes / 1024 / 1024) + "MB)");
             RecentClipsText.Text = clips.Any() ? string.Join("\n", clips) : "No clips yet";
         }
         catch { }
